@@ -1,0 +1,20 @@
+# Application Access Point
+
+server:
+    port: 8080
+    #contextPath: /custompath
+
+management:
+    port: 8081
+    address: 127.0.0.1
+
+
+# Application Configuration
+
+configuration:
+    security:
+        jwtPrivateKey: secretstring
+        jwtAudience: http://TOKEN-RECEIVER-URL
+        jwtIssuer: http://TOKEN-GENERATER-URL
+        jwtExpiryInMinutes: 20
+    
