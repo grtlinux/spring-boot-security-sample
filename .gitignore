@@ -10,12 +10,17 @@ tmp/
 local.properties
 .settings/
 .loadpath
+target
 
 # External tool builders
 .externalToolBuilders/
 
 # Locally stored "Eclipse launch configurations"
 *.launch
+
+# IntelliJ-specific
+*.iml
+.idea
 
 # CDT-specific
 .cproject

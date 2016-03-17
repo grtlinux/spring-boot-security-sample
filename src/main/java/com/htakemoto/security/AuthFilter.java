@@ -18,10 +18,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.htakemoto.security.jwt.JwtClaims;
 
+@Component
 public class AuthFilter extends GenericFilterBean {
 
     @Override

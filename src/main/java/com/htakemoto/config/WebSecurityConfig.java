@@ -13,14 +13,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.htakemoto.security.SimpleCORSFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -35,17 +36,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.htakemoto.security.AuthFilter;
 import com.htakemoto.security.AuthUtil;
+import org.springframework.security.web.header.HeaderWriterFilter;
 
 @Configuration
-@EnableWebMvcSecurity
+@EnableWebSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     
     private static final String ACCESS_DENIED_JSON = "{\"message\":\"You are not privileged to request this resource.\", \"access-denied\":true,\"cause\":\"AUTHORIZATION_FAILURE\"}";
     private static final String UNAUTHORIZED_JSON = "{\"message\":\"Full authentication is required to access this resource.\", \"access-denied\":true,\"cause\":\"NOT AUTHENTICATED\"}";
 
-    @Autowired
-    private AppConfig appConfig;
+    @Autowired SimpleCORSFilter simpleCORSFilter;
+    @Autowired AuthFilter authFilter;
     
     @Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -86,11 +88,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
-        CustomAuthenticationSuccessHandler successHandler = new CustomAuthenticationSuccessHandler();
         
         http
-            .addFilterBefore(new AuthFilter(), LogoutFilter.class)
+            // disable spring security default custom headers
+            // our custom headers are set in SimpleCORSFilter
+            .headers().disable()
+
+            .addFilterAfter(simpleCORSFilter, HeaderWriterFilter.class)
+            .addFilterBefore(authFilter, LogoutFilter.class)
         
             // This disables the built in Cross Site Request Forgery support. 
             // This is used in a html login form but since we do not have that 
@@ -98,7 +103,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf().disable()
             
             .formLogin()
-                .successHandler(successHandler)
+                .successHandler(new CustomAuthenticationSuccessHandler())
                 .loginProcessingUrl("/login")
             
             .and()
@@ -188,6 +193,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
     
     // Define successful authentication response after login
+    // The authentication success handler is only called
+    // when the client successfully authenticates.
     private static class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         
         @Override
@@ -197,7 +204,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             
             // get logged in username
-            String username = auth.getName();
+            String username = auth.getName().toLowerCase();
             
             // get roles
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
