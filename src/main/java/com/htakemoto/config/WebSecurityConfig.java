@@ -61,14 +61,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .withUser("admin").password("password").roles(ADMIN);
         
-        auth
-            .ldapAuthentication()
-                .userDnPatterns("uid={0},ou=people")
-                .groupSearchFilter("member={0}")
-                .groupSearchBase("ou=groups")
-                .groupRoleAttribute("ou")
-                .contextSource()
-                    .ldif("classpath:test-server.ldif");
+//        auth
+//            .ldapAuthentication()
+//                .userDnPatterns("uid={0},ou=people")
+//                .groupSearchFilter("member={0}")
+//                .groupSearchBase("ou=groups")
+//                .groupRoleAttribute("ou")
+//                .contextSource()
+//                    .ldif("classpath:test-server.ldif");
         
 // For LDAP or Active Directory, uncomment the following code.
 //        auth
