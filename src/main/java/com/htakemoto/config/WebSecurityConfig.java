@@ -13,7 +13,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.htakemoto.security.SimpleCORSFilter;
+import com.htakemoto.filter.SimpleCORSFilter;
+import com.htakemoto.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,8 +35,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.htakemoto.security.AuthFilter;
-import com.htakemoto.security.AuthUtil;
+import com.htakemoto.filter.AuthFilter;
 import org.springframework.security.web.header.HeaderWriterFilter;
 
 @Configuration
@@ -48,6 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired SimpleCORSFilter simpleCORSFilter;
     @Autowired AuthFilter authFilter;
+    @Autowired SecurityUtil securityUtil;
     
     @Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -195,7 +196,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // Define successful authentication response after login
     // The authentication success handler is only called
     // when the client successfully authenticates.
-    private static class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+    private class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         
         @Override
         public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -214,7 +215,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 }
             }
             
-            String token = AuthUtil.createAuthToken(username, authorities);
+            String token = securityUtil.createAuthToken(username, authorities);
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.createObjectNode().put("token", token);
             response.setCharacterEncoding("UTF-8");

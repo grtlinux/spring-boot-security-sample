@@ -1,4 +1,4 @@
-package com.htakemoto.security;
+package com.htakemoto.filter;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
