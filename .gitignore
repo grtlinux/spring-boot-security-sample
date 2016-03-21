@@ -11,6 +11,9 @@ local.properties
 .settings/
 .loadpath
 target
+.DS_Store
+.classpath
+.project
 
 # External tool builders
 .externalToolBuilders/
